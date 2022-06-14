@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/linearValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintCurrent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/textCurrent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="@+id/textCurrentValue"
+                app:layout_constraintStart_toStartOf="@+id/textCurrentValue"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Current:" />
+
+            <TextView
+                android:id="@+id/textCurrentValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="64sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textCurrent"
+                tools:text="23" />
+
+            <TextView
+                android:id="@+id/textCurrentUnit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="32sp"
+                app:layout_constraintBottom_toBottomOf="@+id/textCurrentValue"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/textCurrentValue"
+                app:layout_constraintTop_toTopOf="@+id/textCurrentValue"
+                tools:text="°C" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="32dp">
+
+            <TextView
+                android:id="@+id/textTarget"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="@id/textTargetValue"
+                app:layout_constraintStart_toStartOf="@id/textTargetValue"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:layout_editor_absoluteX="16dp"
+                tools:text="Target:" />
+
+            <TextView
+                android:id="@+id/textTargetValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="64sp"
+                app:layout_constraintEnd_toEndOf="@id/textTarget"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textTarget"
+                tools:text="26" />
+
+            <TextView
+                android:id="@+id/textTargetUnit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="32sp"
+                app:layout_constraintBottom_toBottomOf="@+id/textTargetValue"
+                app:layout_constraintStart_toEndOf="@+id/textTargetValue"
+                app:layout_constraintTop_toTopOf="@+id/textTargetValue"
+                tools:text="°C" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/buttonPower"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/power_button"
+        android:drawableTop="@drawable/ic_baseline_power_settings_new_96"
+        android:text="@string/on"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearValue"
+        tools:text="ON" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/sliderSetting"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/slider_label"
+        android:stepSize="1"
+        android:valueFrom="16"
+        android:valueTo="31"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/buttonPower" />
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/sliderAuto"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/slider_label"
+        android:stepSize="1"
+        android:valueFrom="16"
+        android:valueTo="31"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sliderSetting" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
