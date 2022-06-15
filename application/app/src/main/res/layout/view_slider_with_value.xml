@@ -99,7 +99,7 @@
         android:layout_height="wrap_content"
         android:contentDescription="@string/power_button"
         android:drawableTop="@drawable/ic_baseline_power_settings_new_96"
-        android:text="@string/on"
+        android:text="@string/ac_on"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearValue"
@@ -114,8 +114,9 @@
         android:valueFrom="16"
         android:valueTo="31"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/buttonPower" />
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <com.google.android.material.slider.Slider
         android:id="@+id/sliderAuto"
@@ -127,7 +128,30 @@
         android:valueTo="31"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/sliderSetting" />
+        app:layout_constraintTop_toBottomOf="@+id/switchAuto" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/switchAuto"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:minHeight="48dp"
+        android:text="@string/autoAC"
+        android:textSize="21sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sliderSetting" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="@string/temperature"
+        android:textSize="21sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonPower" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

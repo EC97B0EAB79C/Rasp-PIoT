@@ -1,14 +1,20 @@
 package com.tkbaze.rasp_piot.temperature
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.google.android.material.slider.Slider
 import com.tkbaze.rasp_piot.R
 import com.tkbaze.rasp_piot.databinding.ViewSliderWithValueBinding
 
 class TemperatureFragment : Fragment() {
+
+    companion object {
+        val TAG = "TemperatureFragment"
+    }
 
     private var _binding: ViewSliderWithValueBinding? = null
     private val binding get() = _binding!!
@@ -27,17 +33,78 @@ class TemperatureFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.sliderSetting.valueTo = viewModel.maxTemp.toFloat()
-        binding.sliderSetting.valueFrom = viewModel.minTemp.toFloat()
-        binding.sliderSetting.value = viewModel.targetTemp.toFloat()
+        setListener()
+        updateUI()
+    }
 
-        binding.textCurrentValue.text = viewModel.currentTemp.toString()
-        binding.textTargetValue.text = viewModel.targetTemp.toString()
+    private fun setListener() {
+        binding.sliderSetting.addOnChangeListener { _, value, _ ->
+            viewModel.setTargetTemp(value.toInt())
+            updateUI()
+        }
+        binding.sliderSetting.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
+            @SuppressLint("RestrictedApi")
+            override fun onStartTrackingTouch(slider: Slider) {
+                // Do nothing
+            }
 
-        binding.textCurrentUnit.setText(R.string.celsius)
-        binding.textTargetUnit.setText(R.string.celsius)
+            @SuppressLint("RestrictedApi")
+            override fun onStopTrackingTouch(slider: Slider) {
+                viewModel.sendSettingRequest()
+            }
+        })
 
-        binding.textCurrent.setText(R.string.current)
-        binding.textTarget.setText(R.string.target)
+        binding.sliderAuto.addOnChangeListener { _, value, _ ->
+            viewModel.setAutoTemp(value.toInt())
+            updateUI()
+        }
+
+        binding.sliderAuto.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
+            @SuppressLint("RestrictedApi")
+            override fun onStartTrackingTouch(slider: Slider) {
+                // Do nothing
+            }
+
+            @SuppressLint("RestrictedApi")
+            override fun onStopTrackingTouch(slider: Slider) {
+                viewModel.sendAutoRequest()
+            }
+        })
+
+        binding.buttonPower.setOnClickListener {
+            viewModel.toggleIsOn()
+            updateUI()
+        }
+
+        binding.switchAuto.isChecked=viewModel.isAuto
+        binding.switchAuto.setOnCheckedChangeListener { _, b ->
+            viewModel.setIsAuto(b)
+        }
+    }
+
+    private fun updateUI() {
+        binding.apply {
+            sliderSetting.valueFrom = viewModel.minTemp.toFloat()
+            sliderSetting.valueTo = viewModel.maxTemp.toFloat()
+            sliderSetting.value = viewModel.targetTemp.toFloat()
+
+            sliderAuto.valueFrom = viewModel.minTemp.toFloat()
+            sliderAuto.valueTo = viewModel.maxTemp.toFloat()
+            sliderAuto.value = viewModel.autoTemp.toFloat()
+
+            textCurrentValue.text = viewModel.currentTemp.toString()
+            textCurrentUnit.setText(R.string.celsius)
+            textCurrent.setText(R.string.current)
+
+            textTargetValue.text = viewModel.targetTemp.toString()
+            textTargetUnit.setText(R.string.celsius)
+            textTarget.setText(R.string.target)
+
+            buttonPower.text =
+                if (viewModel.isOn) getString(R.string.ac_on)
+                else getString(R.string.ac_off)
+
+            switchAuto.text = String.format(getString(R.string.autoAC), viewModel.autoTemp)
+        }
     }
 }

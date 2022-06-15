@@ -1,10 +1,12 @@
 <resources>
     <string name="app_name">Rasp-PIoT</string>
     <string name="slider_label">temp</string>
-    <string name="power_button">power button</string>
-    <string name="on">ON</string>
-    <string name="off">OFF</string>
+    <string name="power_button">AC power</string>
+    <string name="ac_on">AC ON</string>
+    <string name="ac_off">AC OFF</string>
     <string name="celsius">°C</string>
     <string name="current">Current:</string>
     <string name="target">Target:</string>
+    <string name="autoAC">Auto on at %1$d°C</string>
+    <string name="temperature">Set temperature</string>
 </resources>
