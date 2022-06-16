@@ -93,4 +93,31 @@ class TemperatureViewModel : ViewModel() {
         Log.d(TAG, "Sending Auto Request")
     }
 
+    fun getCurrentSetting(){
+        viewModelScope.launch {
+            //TODO get json
+            val setting=httpGetCurrentSetting()
+        }
+    }
+
+    private fun httpGetCurrentSetting(){
+        var http: HttpURLConnection? = null
+        var src = "-273"
+        //SystemClock.sleep(5000)
+        try {
+            val url = URL(BASE_URI + "currentSetting.php?")
+            http = url.openConnection() as HttpURLConnection
+            http.requestMethod = "GET"
+            http.connect()
+
+            src = http.inputStream.bufferedReader().readText()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            http?.disconnect()
+        }
+
+//        return src
+    }
+
 }
