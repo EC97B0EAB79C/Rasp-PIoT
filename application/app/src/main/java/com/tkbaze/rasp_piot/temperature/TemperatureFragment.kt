@@ -2,6 +2,9 @@ package com.tkbaze.rasp_piot.temperature
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +16,7 @@ import com.tkbaze.rasp_piot.databinding.ViewSliderWithValueBinding
 class TemperatureFragment : Fragment() {
 
     companion object {
-        val TAG = "TemperatureFragment"
+        const val TAG = "TemperatureFragment"
     }
 
     private var _binding: ViewSliderWithValueBinding? = null
@@ -32,6 +35,15 @@ class TemperatureFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val handler: Handler = Handler(Looper.getMainLooper())
+        handler.post(object : Runnable{
+            override fun run() {
+                Log.d(TAG,"update call")
+                viewModel.updateCurrentTemp()
+                handler.postDelayed(this,60*1000)
+            }
+        })
 
         setListener()
         updateUI()
@@ -76,7 +88,7 @@ class TemperatureFragment : Fragment() {
             updateUI()
         }
 
-        binding.switchAuto.isChecked=viewModel.isAuto
+        binding.switchAuto.isChecked = viewModel.isAuto
         binding.switchAuto.setOnCheckedChangeListener { _, b ->
             viewModel.setIsAuto(b)
         }
@@ -92,7 +104,11 @@ class TemperatureFragment : Fragment() {
             sliderAuto.valueTo = viewModel.maxTemp.toFloat()
             sliderAuto.value = viewModel.autoTemp.toFloat()
 
-            textCurrentValue.text = viewModel.currentTemp.toString()
+            viewModel.currentTemp.observe(viewLifecycleOwner) {
+                textCurrentValue.text =
+                    if(it!=-273) it.toString()
+                    else "Err"
+            }
             textCurrentUnit.setText(R.string.celsius)
             textCurrent.setText(R.string.current)
 
