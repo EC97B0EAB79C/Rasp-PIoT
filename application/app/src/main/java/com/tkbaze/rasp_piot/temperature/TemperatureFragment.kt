@@ -24,6 +24,21 @@ class TemperatureFragment : Fragment() {
 
     private val viewModel = TemperatureViewModel()
 
+    lateinit var handler: Handler
+    private val updateTask = object : Runnable {
+        override fun run() {
+            Log.d(TAG, "update call")
+            viewModel.updateCurrentTemp()
+            handler.postDelayed(this, 60 * 1000)
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        handler = Handler(Looper.getMainLooper())
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -35,15 +50,6 @@ class TemperatureFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val handler: Handler = Handler(Looper.getMainLooper())
-        handler.post(object : Runnable{
-            override fun run() {
-                Log.d(TAG,"update call")
-                viewModel.updateCurrentTemp()
-                handler.postDelayed(this,60*1000)
-            }
-        })
 
         setListener()
         updateUI()
@@ -106,7 +112,7 @@ class TemperatureFragment : Fragment() {
 
             viewModel.currentTemp.observe(viewLifecycleOwner) {
                 textCurrentValue.text =
-                    if(it!=-273) it.toString()
+                    if (it != -273) it.toString()
                     else "Err"
             }
             textCurrentUnit.setText(R.string.celsius)
@@ -122,5 +128,15 @@ class TemperatureFragment : Fragment() {
 
             switchAuto.text = String.format(getString(R.string.autoAC), viewModel.autoTemp)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        handler.post(updateTask)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        handler.removeCallbacks(updateTask)
     }
 }
