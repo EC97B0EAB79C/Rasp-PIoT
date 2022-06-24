@@ -89,8 +89,13 @@ class TemperatureFragment : Fragment() {
             }
         })
 
+        binding.buttonPower.text =
+            if (viewModel.isOn) getString(R.string.ac_on)
+            else getString(R.string.ac_off)
+
         binding.buttonPower.setOnClickListener {
             viewModel.toggleIsOn()
+            viewModel.sendSettingRequest()
             updateUI()
         }
 

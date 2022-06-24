@@ -1,6 +1,5 @@
 package com.tkbaze.rasp_piot.temperature
 
-import android.os.SystemClock
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -60,6 +59,7 @@ class TemperatureViewModel : ViewModel() {
         return src.toInt()
     }
 
+
     //
     private var _targetTemp: Int = 23
     val targetTemp: Int get() = _targetTemp
@@ -84,23 +84,117 @@ class TemperatureViewModel : ViewModel() {
         _autoTemp = value
     }
 
+    fun getSetting() {
+        viewModelScope.launch {
+            var src = "failed"
+            src = httpGetSetting()
+            if (src == "failed") {
+                //TODO
+            } else {
+                val temp = src.split(" ").toTypedArray()
+                val __isOn = temp[0].toInt()
+                val __targetTemp = temp[1].toInt()
+                val __isAuto = temp[2].toInt()
+                val __autoTemp = temp[3].toInt()
+            }
+        }
+    }
+
+    private fun httpGetSetting(): String {
+        var http: HttpURLConnection? = null
+        var src = "failed"
+        //SystemClock.sleep(5000)
+        try {
+            val url = URL(BASE_URI + "currentTemp.php?")
+            http = url.openConnection() as HttpURLConnection
+            http.requestMethod = "GET"
+            http.connect()
+
+            src = http.inputStream.bufferedReader().readText()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            http?.disconnect()
+        }
+        return src
+    }
+
     //
     fun sendSettingRequest() {
         Log.d(TAG, "Sending Setting Request")
+        viewModelScope.launch {
+            val result = httpSendSetting()
+            Log.d(TAG, "Setting Request $result")
+        }
+    }
+
+    private fun httpSendSetting(): String {
+        var http: HttpURLConnection? = null
+        var src = "failed"
+        //SystemClock.sleep(5000)
+        try {
+            val url = URL(
+                BASE_URI + "setting.php?" + String.format(
+                    "isOn=%d&targetTemp=%d",
+                    isAuto,
+                    targetTemp
+                )
+            )
+            http = url.openConnection() as HttpURLConnection
+            http.requestMethod = "GET"
+            http.connect()
+
+            src = http.inputStream.bufferedReader().readText()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            http?.disconnect()
+        }
+        return src
     }
 
     fun sendAutoRequest() {
         Log.d(TAG, "Sending Auto Request")
-    }
-
-    fun getCurrentSetting(){
         viewModelScope.launch {
-            //TODO get json
-            val setting=httpGetCurrentSetting()
+            val result = httpSendAuto()
+            Log.d(TAG, "Auto Request $result")
         }
     }
 
-    private fun httpGetCurrentSetting(){
+    private fun httpSendAuto(): String {
+        var http: HttpURLConnection? = null
+        var src = "failed"
+        //SystemClock.sleep(5000)
+        try {
+            val url = URL(
+                BASE_URI + "auto.php?" + String.format(
+                    "isEnabled=%d&onTemp=%d&targetTemp=%d",
+                    isAuto,
+                    autoTemp,
+                    targetTemp
+                )
+            )
+            http = url.openConnection() as HttpURLConnection
+            http.requestMethod = "GET"
+            http.connect()
+
+            src = http.inputStream.bufferedReader().readText()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            http?.disconnect()
+        }
+        return src
+    }
+
+    fun getCurrentSetting() {
+        viewModelScope.launch {
+            //TODO get json
+            val setting = httpGetCurrentSetting()
+        }
+    }
+
+    private fun httpGetCurrentSetting() {
         var http: HttpURLConnection? = null
         var src = "-273"
         //SystemClock.sleep(5000)
