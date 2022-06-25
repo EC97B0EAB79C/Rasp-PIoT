@@ -5,20 +5,22 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.URL
 
 class TemperatureViewModel : ViewModel() {
     private val TAG = "TemperatureViewModel"
-    private val BASE_URI = "http://192.168.144.59/~pi/"
+    private val BASE_URI = "http://192.168.144.143/~pi/"
 
     // Is AC ON/OFF
-    private var _isOn: Boolean = false
-    val isOn: Boolean get() = _isOn
+    private var _isOn = MutableLiveData<Boolean>(false)
+    val isOn: LiveData<Boolean> get() = _isOn
 
     fun toggleIsOn() {
-        _isOn = !isOn
+        _isOn.value = !(isOn.value)!!
     }
 
     // Min Settable Temperature
@@ -39,49 +41,49 @@ class TemperatureViewModel : ViewModel() {
         }
     }
 
-    private fun httpGetCurrentTemp(): Int {
-        var http: HttpURLConnection? = null
+    private suspend fun httpGetCurrentTemp(): Int {
         var src = "-273"
-        //SystemClock.sleep(5000)
-        try {
-            val url = URL(BASE_URI + "currentTemp.php?")
-            http = url.openConnection() as HttpURLConnection
-            http.requestMethod = "GET"
-            http.connect()
+        withContext(Dispatchers.IO) {
+            var http: HttpURLConnection? = null
+            try {
+                val url = URL(BASE_URI + "current_temperature.php")
+                http = url.openConnection() as HttpURLConnection
+                http.requestMethod = "GET"
+                http.connect()
 
-            src = http.inputStream.bufferedReader().readText()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            http?.disconnect()
+                src = http.inputStream.bufferedReader().readText()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                http?.disconnect()
+            }
         }
-
-        return src.toInt()
+        return src.toFloat().toInt()
     }
 
 
     //
-    private var _targetTemp: Int = 23
-    val targetTemp: Int get() = _targetTemp
+    private var _targetTemp = MutableLiveData<Int>(23)
+    val targetTemp: LiveData<Int> get() = _targetTemp
 
     fun setTargetTemp(value: Int) {
-        _targetTemp = value
+        _targetTemp.value = value
     }
 
     //
-    private var _isAuto: Boolean = false
-    val isAuto: Boolean get() = _isAuto
+    private var _isAuto = MutableLiveData<Boolean>(false)
+    val isAuto: LiveData<Boolean> get() = _isAuto
 
     fun setIsAuto(value: Boolean) {
-        _isAuto = value
+        _isAuto.value = value
     }
 
     //
-    private var _autoTemp: Int = 23
-    val autoTemp: Int get() = _autoTemp
+    private var _autoTemp = MutableLiveData<Int>(23)
+    val autoTemp: LiveData<Int> get() = _autoTemp
 
     fun setAutoTemp(value: Int) {
-        _autoTemp = value
+        _autoTemp.value = value
     }
 
     fun getSetting() {
@@ -91,32 +93,35 @@ class TemperatureViewModel : ViewModel() {
             if (src == "failed") {
                 //TODO
             } else {
+                Log.d(TAG, src)
                 val temp = src.split(" ").toTypedArray()
-                val __isOn = temp[0].toInt()
-                val __targetTemp = temp[1].toInt()
-                val __isAuto = temp[2].toInt()
-                val __autoTemp = temp[3].toInt()
+                _isOn.value = temp[0].toInt() > 0
+                _targetTemp.value = temp[1].toInt()
+                _isAuto.value = temp[2].toInt() > 0
+                _autoTemp.value = temp[3].toInt()
             }
         }
     }
 
-    private fun httpGetSetting(): String {
-        var http: HttpURLConnection? = null
+    private suspend fun httpGetSetting(): String {
         var src = "failed"
-        //SystemClock.sleep(5000)
-        try {
-            val url = URL(BASE_URI + "currentTemp.php?")
-            http = url.openConnection() as HttpURLConnection
-            http.requestMethod = "GET"
-            http.connect()
+        withContext(Dispatchers.IO) {
+            var http: HttpURLConnection? = null
+            try {
+                val url = URL(BASE_URI + "ac_setting.php?")
+                http = url.openConnection() as HttpURLConnection
+                http.requestMethod = "GET"
+                http.connect()
 
-            src = http.inputStream.bufferedReader().readText()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            http?.disconnect()
+                src = http.inputStream.bufferedReader().readText()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                http?.disconnect()
+            }
         }
         return src
+
     }
 
     //
@@ -124,31 +129,36 @@ class TemperatureViewModel : ViewModel() {
         Log.d(TAG, "Sending Setting Request")
         viewModelScope.launch {
             val result = httpSendSetting()
+            if(isAuto.value!!)
+                httpSendAuto()
             Log.d(TAG, "Setting Request $result")
         }
     }
 
-    private fun httpSendSetting(): String {
-        var http: HttpURLConnection? = null
+    private suspend fun httpSendSetting(): String {
         var src = "failed"
-        //SystemClock.sleep(5000)
-        try {
-            val url = URL(
-                BASE_URI + "setting.php?" + String.format(
-                    "isOn=%d&targetTemp=%d",
-                    isAuto,
-                    targetTemp
-                )
-            )
-            http = url.openConnection() as HttpURLConnection
-            http.requestMethod = "GET"
-            http.connect()
 
-            src = http.inputStream.bufferedReader().readText()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            http?.disconnect()
+        withContext(Dispatchers.IO) {
+            var http: HttpURLConnection? = null
+
+            try {
+                val urlString = BASE_URI + "ac_control.php?" + String.format(
+                    "isOn=%d&targetTemp=%d",
+                    if (isOn.value!!) 1 else 0,
+                    targetTemp.value
+                )
+                Log.d(TAG, urlString)
+                val url = URL(urlString)
+                http = url.openConnection() as HttpURLConnection
+                http.requestMethod = "GET"
+                http.connect()
+
+                src = http.inputStream.bufferedReader().readText()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                http?.disconnect()
+            }
         }
         return src
     }
@@ -161,28 +171,29 @@ class TemperatureViewModel : ViewModel() {
         }
     }
 
-    private fun httpSendAuto(): String {
-        var http: HttpURLConnection? = null
+    private suspend fun httpSendAuto(): String {
         var src = "failed"
-        //SystemClock.sleep(5000)
-        try {
-            val url = URL(
-                BASE_URI + "auto.php?" + String.format(
-                    "isEnabled=%d&onTemp=%d&targetTemp=%d",
-                    isAuto,
-                    autoTemp,
-                    targetTemp
+        withContext(Dispatchers.IO) {
+            var http: HttpURLConnection? = null
+            try {
+                val url = URL(
+                    BASE_URI + "ac_auto.php?" + String.format(
+                        "isEnabled=%d&onTemp=%d&targetTemp=%d",
+                        if (isAuto.value!!) 1 else 0,
+                        autoTemp.value,
+                        targetTemp.value
+                    )
                 )
-            )
-            http = url.openConnection() as HttpURLConnection
-            http.requestMethod = "GET"
-            http.connect()
+                http = url.openConnection() as HttpURLConnection
+                http.requestMethod = "GET"
+                http.connect()
 
-            src = http.inputStream.bufferedReader().readText()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            http?.disconnect()
+                src = http.inputStream.bufferedReader().readText()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                http?.disconnect()
+            }
         }
         return src
     }

@@ -50,7 +50,7 @@ class TemperatureFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        viewModel.getSetting()
         setListener()
         updateUI()
     }
@@ -89,9 +89,12 @@ class TemperatureFragment : Fragment() {
             }
         })
 
-        binding.buttonPower.text =
-            if (viewModel.isOn) getString(R.string.ac_on)
-            else getString(R.string.ac_off)
+
+        viewModel.isOn.observe(viewLifecycleOwner) {
+            if (it) binding.buttonPower.text = getString(R.string.ac_on)
+            else binding.buttonPower.text = getString(R.string.ac_off)
+        }
+
 
         binding.buttonPower.setOnClickListener {
             viewModel.toggleIsOn()
@@ -99,9 +102,12 @@ class TemperatureFragment : Fragment() {
             updateUI()
         }
 
-        binding.switchAuto.isChecked = viewModel.isAuto
+        viewModel.isAuto.observe(viewLifecycleOwner) {
+            binding.switchAuto.isChecked = it
+        }
         binding.switchAuto.setOnCheckedChangeListener { _, b ->
             viewModel.setIsAuto(b)
+            viewModel.sendAutoRequest()
         }
     }
 
@@ -109,11 +115,15 @@ class TemperatureFragment : Fragment() {
         binding.apply {
             sliderSetting.valueFrom = viewModel.minTemp.toFloat()
             sliderSetting.valueTo = viewModel.maxTemp.toFloat()
-            sliderSetting.value = viewModel.targetTemp.toFloat()
+            viewModel.targetTemp.observe(viewLifecycleOwner) {
+                sliderSetting.value = it.toFloat()
+            }
 
             sliderAuto.valueFrom = viewModel.minTemp.toFloat()
             sliderAuto.valueTo = viewModel.maxTemp.toFloat()
-            sliderAuto.value = viewModel.autoTemp.toFloat()
+            viewModel.autoTemp.observe(viewLifecycleOwner) {
+                sliderAuto.value = it.toFloat()
+            }
 
             viewModel.currentTemp.observe(viewLifecycleOwner) {
                 textCurrentValue.text =
@@ -123,15 +133,22 @@ class TemperatureFragment : Fragment() {
             textCurrentUnit.setText(R.string.celsius)
             textCurrent.setText(R.string.current)
 
-            textTargetValue.text = viewModel.targetTemp.toString()
+            viewModel.targetTemp.observe(viewLifecycleOwner){
+                textTargetValue.text = it.toString()
+            }
+
             textTargetUnit.setText(R.string.celsius)
             textTarget.setText(R.string.target)
 
-            buttonPower.text =
-                if (viewModel.isOn) getString(R.string.ac_on)
-                else getString(R.string.ac_off)
+            viewModel.isOn.observe(viewLifecycleOwner) {
+                if (it) buttonPower.text = getString(R.string.ac_on)
+                else buttonPower.text = getString(R.string.ac_off)
+            }
 
-            switchAuto.text = String.format(getString(R.string.autoAC), viewModel.autoTemp)
+            viewModel.autoTemp.observe(viewLifecycleOwner){
+                switchAuto.text = String.format(getString(R.string.autoAC), it)
+            }
+
         }
     }
 
