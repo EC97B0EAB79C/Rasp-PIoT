@@ -197,7 +197,7 @@ class TemperatureViewModel : ViewModel() {
         }
         return src
     }
-
+/*
     fun getCurrentSetting() {
         viewModelScope.launch {
             //TODO get json
@@ -205,24 +205,27 @@ class TemperatureViewModel : ViewModel() {
         }
     }
 
-    private fun httpGetCurrentSetting() {
-        var http: HttpURLConnection? = null
+    private suspend fun httpGetCurrentSetting() {
+
         var src = "-273"
-        //SystemClock.sleep(5000)
-        try {
-            val url = URL(BASE_URI + "currentSetting.php?")
-            http = url.openConnection() as HttpURLConnection
-            http.requestMethod = "GET"
-            http.connect()
+        withContext(Dispatchers.IO) {
+            var http: HttpURLConnection? = null
+            try {
+                val url = URL(BASE_URI + "currentSetting.php?")
+                http = url.openConnection() as HttpURLConnection
+                http.requestMethod = "GET"
+                http.connect()
 
-            src = http.inputStream.bufferedReader().readText()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            http?.disconnect()
+                src = http.inputStream.bufferedReader().readText()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                http?.disconnect()
+            }
         }
-
 //        return src
     }
+
+ */
 
 }

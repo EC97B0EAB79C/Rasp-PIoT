@@ -29,6 +29,7 @@ class TemperatureFragment : Fragment() {
         override fun run() {
             Log.d(TAG, "update call")
             viewModel.updateCurrentTemp()
+            viewModel.getSetting()
             handler.postDelayed(this, 60 * 1000)
         }
     }
@@ -50,7 +51,6 @@ class TemperatureFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.getSetting()
         setListener()
         updateUI()
     }
