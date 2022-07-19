@@ -13,7 +13,6 @@ import java.net.URL
 
 class TemperatureViewModel : ViewModel() {
     private val TAG = "TemperatureViewModel"
-    private val BASE_URI = "http://192.168.144.143/~pi/"
 
     // Is AC ON/OFF
     private var _isOn = MutableLiveData<Boolean>(false)
@@ -31,10 +30,46 @@ class TemperatureViewModel : ViewModel() {
     private var _maxTemp: Int = 31
     val maxTemp: Int get() = _maxTemp
 
-    // Current Temperature From Raspberry Pi
+    // Current Room Temperature
     private var _currentTemp = MutableLiveData<Int>(0)
     val currentTemp: LiveData<Int> get() = _currentTemp
 
+
+    // Target AC Temperature
+    private var _targetTemp = MutableLiveData<Int>(23)
+    val targetTemp: LiveData<Int> get() = _targetTemp
+
+    fun setTargetTemp(value: Int) {
+        _targetTemp.value = value
+    }
+
+    // Is Auto On Function Enabled
+    private var _isAuto = MutableLiveData<Boolean>(false)
+    val isAuto: LiveData<Boolean> get() = _isAuto
+
+    fun setIsAuto(value: Boolean) {
+        _isAuto.value = value
+    }
+
+    // Temperature for Turning AC Automatically
+    private var _autoTemp = MutableLiveData<Int>(23)
+    val autoTemp: LiveData<Int> get() = _autoTemp
+
+    fun setAutoTemp(value: Int) {
+        _autoTemp.value = value
+    }
+
+
+    /* Network Functions
+        updateCurrentTemp
+        getSetting
+        sendSettingRequest
+        sendAutoRequest
+     */
+
+    private val BASE_URI = "http://192.168.144.143/~pi/"
+
+    // Get Current Temperature from Raspberry Pi
     fun updateCurrentTemp() {
         viewModelScope.launch {
             _currentTemp.value = httpGetCurrentTemp()
@@ -62,30 +97,7 @@ class TemperatureViewModel : ViewModel() {
     }
 
 
-    //
-    private var _targetTemp = MutableLiveData<Int>(23)
-    val targetTemp: LiveData<Int> get() = _targetTemp
-
-    fun setTargetTemp(value: Int) {
-        _targetTemp.value = value
-    }
-
-    //
-    private var _isAuto = MutableLiveData<Boolean>(false)
-    val isAuto: LiveData<Boolean> get() = _isAuto
-
-    fun setIsAuto(value: Boolean) {
-        _isAuto.value = value
-    }
-
-    //
-    private var _autoTemp = MutableLiveData<Int>(23)
-    val autoTemp: LiveData<Int> get() = _autoTemp
-
-    fun setAutoTemp(value: Int) {
-        _autoTemp.value = value
-    }
-
+    // Get Setting Data Saved on Raspberry Pi
     fun getSetting() {
         viewModelScope.launch {
             var src = "failed"
@@ -121,15 +133,15 @@ class TemperatureViewModel : ViewModel() {
             }
         }
         return src
-
     }
 
-    //
+
+    // Send AC Setting to Raspberry Pi
     fun sendSettingRequest() {
         Log.d(TAG, "Sending Setting Request")
         viewModelScope.launch {
             val result = httpSendSetting()
-            if(isAuto.value!!)
+            if (isAuto.value!!)
                 httpSendAuto()
             Log.d(TAG, "Setting Request $result")
         }
@@ -163,6 +175,8 @@ class TemperatureViewModel : ViewModel() {
         return src
     }
 
+
+    // Send Auto On Setting to Raspberry Pi
     fun sendAutoRequest() {
         Log.d(TAG, "Sending Auto Request")
         viewModelScope.launch {
@@ -197,35 +211,4 @@ class TemperatureViewModel : ViewModel() {
         }
         return src
     }
-/*
-    fun getCurrentSetting() {
-        viewModelScope.launch {
-            //TODO get json
-            val setting = httpGetCurrentSetting()
-        }
-    }
-
-    private suspend fun httpGetCurrentSetting() {
-
-        var src = "-273"
-        withContext(Dispatchers.IO) {
-            var http: HttpURLConnection? = null
-            try {
-                val url = URL(BASE_URI + "currentSetting.php?")
-                http = url.openConnection() as HttpURLConnection
-                http.requestMethod = "GET"
-                http.connect()
-
-                src = http.inputStream.bufferedReader().readText()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                http?.disconnect()
-            }
-        }
-//        return src
-    }
-
- */
-
 }
